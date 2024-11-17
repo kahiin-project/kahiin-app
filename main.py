@@ -8,7 +8,10 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 kivy.require('1.11.1')  # Set to your Kivy version
-
+import hypercorn
+from hypercorn.config import Config
+import asyncio
+from flask_socketio import SocketIO, emit
 # common modules
 import sys
 import os
@@ -16,16 +19,18 @@ import time
 import signal
 from multiprocessing import Process
 import threading
+import socket
 
-from multiprocessing import Process
-import threading
-import socket  # Import the socket module
+from kahiin import app as kahiin
+# main.py
+from kivy.support import install_twisted_reactor
+install_twisted_reactor()
 
-# Flask modules
 from flask import Flask
+from flask_socketio import SocketIO
+from threading import Lock
+import eventlet
 
-# Initialize Flask
-app = Flask(__name__)
 
 def signal_handler(signal, frame):
     print(" CTRL + C detected, exiting ... ")
@@ -58,7 +63,17 @@ class MainApp(App):
     def start_Flask(self):
         print("Starting Flask...")
         # Using waitress instead of eventlet
-        app.run(host='0.0.0.0', port=5000, threaded=True)
+        config = Config()
+        config.bind = ["0.0.0.0:5000"]
+        
+        async def run_server():
+            await hypercorn.asyncio.serve(kahiin.app, config)
+
+        # Run the event loop in the current thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(run_server())
+        print("Server started")
     
     def stop(self):
         print("terminating Flask and exiting...")
@@ -91,7 +106,7 @@ ScreenManager:
                 Button:
                     text: app.MessageButtonEnter  # start app
                     on_press:
-                        app.start()
+                        app.start() 
                 Button:
                     text: app.MessageButtonExit  # exit app
                     on_press:

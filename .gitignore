@@ -4,3 +4,4 @@ build/
 release/
 *.apk
 .already
+module_requirement_maker/* 
