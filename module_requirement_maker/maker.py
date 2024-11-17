@@ -65,7 +65,7 @@ def get_package_info(package_name, processed=None, results=None, depth=0):
         try:
             package = pkg_resources.working_set.by_key[package_name]
             for req in package.requires():
-                dep_name = req.project_name
+                dep_name = req.project_name.lower()
                 get_package_info(dep_name, processed, results, depth + 1)
         except Exception as e:
             print(f"{' ' * depth}Erreur avec les dépendances de {package_name}: {str(e)}")
