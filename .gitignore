@@ -1,0 +1,6 @@
+.buildozer/
+venv/
+build/
+release/
+*.apk
+.already
