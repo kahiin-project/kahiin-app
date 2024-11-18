@@ -3,10 +3,10 @@ if [ ! -f .already ]; then
   touch .already
   if command -v apt > /dev/null; then
     echo "export PATH=$PATH:~/.local/bin/" >> ~/.bashrc
-    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev platform-tools autoconf
+    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev android-tools-adb autoconf
     python3 -m venv venv
     source venv/bin/activate
-    pip3 install -y --upgrade Cython==0.29.33 virtualenv buildozer
+    pip3 install --upgrade Cython==0.29.33 virtualenv buildozer setuptools
     sudo update-alternatives --config java
   fi
   if command -v pacman > /dev/null; then

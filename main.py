@@ -1,36 +1,76 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
-# kivy modules first, if not Kivy may cause problems
 import kivy
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.label import Label
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
-kivy.require('1.11.1')  # Set to your Kivy version
-import hypercorn
-from hypercorn.config import Config
-import asyncio
-from flask_socketio import SocketIO, emit
-# common modules
+kivy.require('1.11.1')
+
 import sys
 import os
 import time
 import signal
-from multiprocessing import Process
-import threading
 import socket
+import threading
+import queue
+from werkzeug.serving import make_server
+from kahiin import app as flask_app  # Import just the Flask app
 
-from kahiin import app as kahiin
-# main.py
-from kivy.support import install_twisted_reactor
-install_twisted_reactor()
+class ThreadSafeServer:
+    def __init__(self, app):
+        self.app = app
+        self.server = None
+        self.server_thread = None
+        self.is_running = False
+        self.event_queue = queue.Queue()
+        self.thread_lock = threading.Lock()
+        
+    def _process_events(self):
+        while self.is_running:
+            try:
+                event = self.event_queue.get(timeout=0.1)
+                if event == 'stop':
+                    break
+                # Process other events if needed
+            except queue.Empty:
+                continue
 
-from flask import Flask
-from flask_socketio import SocketIO
-from threading import Lock
-import eventlet
+    def start_server(self):
+        with self.thread_lock:
+            if not self.server_thread:
+                self.is_running = True
+                # Create WSGI server
+                self.server = make_server('0.0.0.0', 5000, self.app)
+                self.server_thread = threading.Thread(target=self._run_server)
+                self.server_thread.daemon = True
+                
+                # Start event processing thread
+                self.event_thread = threading.Thread(target=self._process_events)
+                self.event_thread.daemon = True
+                
+                self.server_thread.start()
+                self.event_thread.start()
 
+    def stop_server(self):
+        if self.is_running:
+            self.is_running = False
+            self.event_queue.put('stop')
+            if self.server:
+                self.server.shutdown()
+            if self.server_thread:
+                self.server_thread.join()
+            if self.event_thread:
+                self.event_thread.join()
+            self.server_thread = None
+            self.event_thread = None
+
+    def _run_server(self):
+        try:
+            self.server.serve_forever()
+        except Exception as e:
+            print(f"Server error: {e}")
+        finally:
+            self.is_running = False
 
 def signal_handler(signal, frame):
     print(" CTRL + C detected, exiting ... ")
@@ -39,7 +79,6 @@ def signal_handler(signal, frame):
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        # doesn't even have to be reachable
         s.connect(('10.254.254.254', 1))
         IP = s.getsockname()[0]
     except Exception:
@@ -48,7 +87,6 @@ def get_local_ip():
         s.close()
     return IP
 
-# kivy gui classes ######################################################
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         self.name = "MAIN SCREEN"
@@ -56,36 +94,24 @@ class MainScreen(Screen):
 
 class MainApp(App):
     MainScreenTitle = "MainScreen title"
-    MainScreenLabel = f"Local IP: {get_local_ip()}"  # Set the label to the local IP
+    MainScreenLabel = f"Local IP: {get_local_ip()}"
     MessageButtonEnter = "START"
     MessageButtonExit = "EXIT"
     
-    def start_Flask(self):
-        print("Starting Flask...")
-        # Using waitress instead of eventlet
-        config = Config()
-        config.bind = ["0.0.0.0:5000"]
-        
-        async def run_server():
-            await hypercorn.asyncio.serve(kahiin.app, config)
-
-        # Run the event loop in the current thread
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(run_server())
-        print("Server started")
-    
-    def stop(self):
-        print("terminating Flask and exiting...")
-        global p1
-        p1.terminate()
+    def __init__(self, **kwargs):
+        super(MainApp, self).__init__(**kwargs)
+        self.server = ThreadSafeServer(flask_app)
     
     def start(self):
-        print("starting Flask as process...")
-        global p1
-        p1 = Process(target=self.start_Flask)  # assign Flask to a process
-        p1.daemon = True
-        p1.start()  # launch Flask as separate process
+        print("Starting Flask server...")
+        self.server.start_server()
+    
+    def stop(self):
+        print("Stopping Flask server...")
+        self.server.stop_server()
+    
+    def on_stop(self):
+        self.stop()
     
     def build(self):
         sm = Builder.load_string("""
@@ -104,20 +130,15 @@ ScreenManager:
                 spacing: 10
                 size_hint: 1, .5
                 Button:
-                    text: app.MessageButtonEnter  # start app
-                    on_press:
-                        app.start() 
+                    text: app.MessageButtonEnter
+                    on_press: app.start()
                 Button:
-                    text: app.MessageButtonExit  # exit app
-                    on_press:
-                        app.stop()
+                    text: app.MessageButtonExit
+                    on_press: app.stop()
         """)
         return sm
 
-# main ################################################
 if __name__ == '__main__':
-    # CTRL+C signal handler
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
-    MainApp().run()  # run Kivy app
+    MainApp().run()
