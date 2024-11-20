@@ -14,7 +14,7 @@ if [ ! -f .already ]; then
     sudo pacman -S --noconfirm python3 python3-pip base-devel cython autoconf openjdk-17-jdk libtool pkg-config zlib ncurses cmake libffi openssl platform-tools 
     python3 -m venv venv
     source venv/bin/activate
-    pip3 install -y --upgrade Cython==0.29.33 virtualenv buildozer
+    pip3 install --upgrade Cython==0.29.33 virtualenv buildozer setuptools
     sudo archlinux-java set java-17-openjdk
   fi
 fi
