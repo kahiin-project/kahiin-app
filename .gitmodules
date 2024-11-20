@@ -1,4 +1,3 @@
 [submodule "kahiin"]
 	path = kahiin
 	url = https://github.com/kahiin-project/kahiin
-	branch = kahiin-app-test

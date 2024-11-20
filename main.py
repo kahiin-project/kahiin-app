@@ -5,12 +5,15 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 kivy.require('1.11.1')
-
+from android.permissions import request_permissions, Permission
+from android import AndroidService
 import signal
 import socket
 # Import just the Flask app
-from kahiin.app import start_flask
+from kahiin.app import start_flask,stop_flask
 
+
+service = AndroidService('Kahiin Service', 'running')
 
 def signal_handler(signal, frame):
     print(" CTRL + C detected, exiting ... ")
@@ -43,11 +46,20 @@ class MainApp(App):
     
     def start(self):
         print("Starting Flask server...")
+        def callback(permissions, results):
+            if all([res for res in results]):
+                print("Got all permissions!")
+            else:
+                print("Did not get all permissions!")
+        request_permissions([Permission.INTERNET, Permission.ACCESS_NETWORK_STATE, Permission.WAKE_LOCK, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS], callback)
+
+        service.start('service started')
         start_flask()
     
     def stop(self):
         print("Stopping Flask server...")
-        self.server.stop_server()
+        service.stop()
+        stop_flask()
     
     def on_stop(self):
         self.stop()
