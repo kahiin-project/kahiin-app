@@ -5,3 +5,4 @@ release/
 *.apk
 .already
 module_requirement_maker/* 
+*__pycache__/*

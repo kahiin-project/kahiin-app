@@ -6,71 +6,11 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 kivy.require('1.11.1')
 
-import sys
-import os
-import time
 import signal
 import socket
-import threading
-import queue
-from werkzeug.serving import make_server
-from kahiin import app as flask_app  # Import just the Flask app
+# Import just the Flask app
+from kahiin.app import start_flask
 
-class ThreadSafeServer:
-    def __init__(self, app):
-        self.app = app
-        self.server = None
-        self.server_thread = None
-        self.is_running = False
-        self.event_queue = queue.Queue()
-        self.thread_lock = threading.Lock()
-        
-    def _process_events(self):
-        while self.is_running:
-            try:
-                event = self.event_queue.get(timeout=0.1)
-                if event == 'stop':
-                    break
-                # Process other events if needed
-            except queue.Empty:
-                continue
-
-    def start_server(self):
-        with self.thread_lock:
-            if not self.server_thread:
-                self.is_running = True
-                # Create WSGI server
-                self.server = make_server('0.0.0.0', 5000, self.app)
-                self.server_thread = threading.Thread(target=self._run_server)
-                self.server_thread.daemon = True
-                
-                # Start event processing thread
-                self.event_thread = threading.Thread(target=self._process_events)
-                self.event_thread.daemon = True
-                
-                self.server_thread.start()
-                self.event_thread.start()
-
-    def stop_server(self):
-        if self.is_running:
-            self.is_running = False
-            self.event_queue.put('stop')
-            if self.server:
-                self.server.shutdown()
-            if self.server_thread:
-                self.server_thread.join()
-            if self.event_thread:
-                self.event_thread.join()
-            self.server_thread = None
-            self.event_thread = None
-
-    def _run_server(self):
-        try:
-            self.server.serve_forever()
-        except Exception as e:
-            print(f"Server error: {e}")
-        finally:
-            self.is_running = False
 
 def signal_handler(signal, frame):
     print(" CTRL + C detected, exiting ... ")
@@ -100,11 +40,10 @@ class MainApp(App):
     
     def __init__(self, **kwargs):
         super(MainApp, self).__init__(**kwargs)
-        self.server = ThreadSafeServer(flask_app)
     
     def start(self):
         print("Starting Flask server...")
-        self.server.start_server()
+        start_flask()
     
     def stop(self):
         print("Stopping Flask server...")
