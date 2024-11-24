@@ -95,7 +95,7 @@ class MainApp(App):
         if platform == 'android':
             try:
                 # Import Android-specific classes
-                PythonService = autoclass('org.kivy.android.PythonService')
+                PythonService = autoclass('org.kahiin.android.WebServerService')
                 Context = autoclass('android.content.Context')
                 NotificationManager = autoclass('android.app.NotificationManager')
                 NotificationChannel = autoclass('android.app.NotificationChannel')
@@ -138,31 +138,23 @@ class MainApp(App):
     if platform == 'android':
         @run_on_ui_thread
         def request_ignore_battery_optimizations(self):
-            if platform == 'android':
-                try:
-                    Context = autoclass('android.content.Context')
-                    PowerManager = autoclass('android.os.PowerManager')
-                    Intent = autoclass('android.content.Intent')
-                    Uri = autoclass('android.net.Uri')
-                    PythonActivity = autoclass('org.kivy.android.PythonActivity')
+            try:
+                Context = autoclass('android.content.Context')
+                Intent = autoclass('android.content.Intent')
+                Uri = autoclass('android.net.Uri')
+                PythonActivity = autoclass('org.kahiin.android.WebServerActivity')
 
-                    # Get the current activity
-                    context = PythonActivity.mActivity
-                    
-                    # Check if battery optimization is enabled
-                    power_manager = context.getSystemService(Context.POWER_SERVICE)
-                    package_name = context.getPackageName()
-                    
-                    if not power_manager.isIgnoringBatteryOptimizations(package_name):
-                        # Request to ignore battery optimizations
-                        intent = Intent(Intent.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                        intent.setData(Uri.parse(f"package:{package_name}"))
-                        context.startActivity(intent)
-                    
-                    logging.info("Battery optimization request completed")
-                except Exception as e:
-                    logging.error(f"Battery optimization request failed: {e}")
-                    traceback.print_exc()
+                # Get the current activity
+                context = PythonActivity.mActivity
+                
+                # Request to ignore battery optimizations
+                intent = Intent(Intent.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                context.startActivity(intent)
+                
+                logging.info("Battery optimization settings opened")
+            except Exception as e:
+                logging.error(f"Battery optimization request failed: {e}")
+                traceback.print_exc()
 
     def build(self):
         # Create screen manager
