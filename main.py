@@ -13,15 +13,25 @@ import threading
 import traceback
 import logging
 
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.utils import platform
 from kivy.core.window import Window
+from kivy.utils import platform
+from kivymd.app import MDApp
+from kivymd.uix.screen import MDScreen
+from kivy.uix.screenmanager import ScreenManager
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.label import MDLabel
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.tab import MDTabs, MDTabsBase
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.button import MDIconButton
+from kivymd.uix.textfield import MDTextField
+import json
+from kahiin.app import start_flask
+import hashlib
+from kivy.core.text import LabelBase
 
+LabelBase.register(name='NotoEmoji', fn_regular='NotoColorEmoji.ttf')
+LabelBase.register(name='NotoSans', fn_regular='NotoSans.ttf')
 # Logging setup
 logging.basicConfig(level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -36,7 +46,8 @@ if platform == 'android':
     from android.runnable import run_on_ui_thread
     from android.permissions import request_permissions, Permission
 
-class SafeButton(Button):
+
+class SafeButton(MDRaisedButton):
     def on_touch_down(self, touch):
         try:
             return super(SafeButton, self).on_touch_down(touch)
@@ -45,45 +56,209 @@ class SafeButton(Button):
             traceback.print_exc()
             return False
 
-class MainScreen(Screen):
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception as e:
+        logging.error(f"IP retrieval error: {e}")
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
+class Tab(MDFloatLayout, MDTabsBase):
+    pass
+
+# Modifions la classe MainScreen pour ajouter les onglets
+class MainScreen(MDScreen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.name = "main_screen"
-
-class MainApp(App):
-    def __init__(self, **kwargs):
-        super(MainApp, self).__init__(**kwargs)
-        self.local_ip = self.get_local_ip()
+        self.app = MDApp.get_running_app()  # Référence à l'app principale
         self.flask_thread = None
         self.service = None
+
+        # Charger les paramètres actuels
+        with open(os.path.join(os.path.dirname(__file__), 'kahiin', 'settings.json'), 'r') as f:
+            self.settings = json.load(f)
+
+        # Créer le layout principal
+        layout = MDBoxLayout(orientation='vertical')
         
-        # Prevent app from closing on back button
-        Window.bind(on_keyboard=self.on_key)
+        # Ajouter les tabs
+        tabs = MDTabs()
+        
+        # Tab principale
+        main_tab = Tab(title='Serveur')
+        main_content = MDBoxLayout(orientation='vertical', padding=20, spacing=10)
+        
+        # Message de garde en plein écran
+        warning_label = MDLabel(
+            text='[size=20sp][font=NotoEmoji]⚠️[/font][/size] Gardez l\'application en plein écran pour éviter qu\'Android ne la ferme',
+            font_name='NotoSans',
+            theme_text_color="Hint",
+            size_hint_y=None,
 
-    def on_key(self, window, key, *args):
-        # Prevent back button from closing the app
-        if key == 27:  # ESC/Back button
-            return True
-        return False
+            height=50
+        )
+        main_content.add_widget(warning_label)
 
-    def get_local_ip(self):
+        # IP Address Label
+        ip_label = MDLabel(
+            text=f"IP Locale: {get_local_ip()}",
+            font_style='H5',
+            size_hint_y=None,
+            height=50
+        )
+        main_content.add_widget(ip_label)
+
+        # Start Server Button stylisé avec la bonne référence
+        self.start_button = SafeButton(
+            text='Démarrer le serveur',
+            icon='server-network',
+            on_press=self.on_start_button,  # Changé ici
+            md_bg_color=(0.2, 0.8, 0.2, 1),
+            size_hint_y=None,
+            height=50
+        )
+        main_content.add_widget(self.start_button)
+
+        # Exit Button stylisé avec la bonne référence
+        exit_button = SafeButton(
+            text='Quitter',
+            icon='exit-to-app',
+            on_press=self.stop_app,  # Changé ici
+            md_bg_color=(0.8, 0.2, 0.2, 1),
+            size_hint_y=None,
+            height=50
+        )
+        main_content.add_widget(exit_button)
+        main_tab.add_widget(main_content)
+
+        # Tab paramètres
+        settings_tab = Tab(title='Paramètres')
+        settings_content = MDBoxLayout(orientation='vertical', padding=20, spacing=10)
+
+        # Sélection de langue avec drapeaux
+        languages = {
+            'fr': {'icon': '🇫🇷', 'name': 'Français'},
+            'en': {'icon': '🇬🇧', 'name': 'English'},
+            'es': {'icon': '🇪🇸', 'name': 'Español'}
+        }
+        lang_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+        for lang_code, lang_info in languages.items():
+            lang_btn = MDRaisedButton(
+                text=f"[font=NotoEmoji][size=20sp]{lang_info['icon']}[/font][/size] {lang_info['name']}",
+                on_press=lambda x, lc=lang_code: self.change_language(lc),
+                font_name='NotoSans',
+                size_hint_y=None,
+                height=50
+            )
+            lang_box.add_widget(lang_btn)
+        settings_content.add_widget(lang_box)
+
+        # Titre de la section Accessibilité
+        access_label = MDLabel(
+            text="Paramètres d'accessibilité",
+            font_style='H6',
+            size_hint_y=None,
+            height=40
+        )
+        settings_content.add_widget(access_label)
+
+        # Boutons pour les paramètres d'accessibilité
+        access_box = MDBoxLayout(orientation='vertical', spacing=10, adaptive_height=True)
+        
+        self.dyslexic_btn = MDRaisedButton(
+            text="Mode dyslexique",
+            on_press=lambda x: self.toggle_setting('dyslexicMode', self.dyslexic_btn),
+            size_hint_y=None,
+            height=50,
+            md_bg_color=self.get_button_color('dyslexicMode')
+        )
+        
+        self.endOnAllAnswered_btn = MDRaisedButton(
+            text="Finir quand tous ont répondu",
+            on_press=lambda x: self.toggle_setting('endOnAllAnswered', self.endOnAllAnswered_btn),
+            size_hint_y=None,
+            height=50,
+            md_bg_color=self.get_button_color('endOnAllAnswered')
+        )
+
+        self.randomOrder_btn = MDRaisedButton(
+            text="Ordre aléatoire",
+            on_press=lambda x: self.toggle_setting('randomOrder', self.randomOrder_btn),
+            size_hint_y=None,
+            height=50,
+            md_bg_color=self.get_button_color('randomOrder')
+        )
+
+        
+        access_box.add_widget(self.dyslexic_btn)
+        access_box.add_widget(self.endOnAllAnswered_btn)
+        access_box.add_widget(self.randomOrder_btn)
+        settings_content.add_widget(access_box)
+
+        # Section mot de passe avec bouton de validation
+        pwd_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+        
+        self.password_field = MDTextField(
+            hint_text="Nouveau mot de passe admin",
+            password=True,
+            helper_text="Laissez vide pour ne pas changer",
+            size_hint_x=0.7
+        )
+        
+        pwd_button = MDRaisedButton(
+            text="Changer",
+            on_press=lambda x: self.change_password(self.password_field.text),
+            size_hint_x=0.3
+        )
+        
+        pwd_box.add_widget(self.password_field)
+        pwd_box.add_widget(pwd_button)
+        settings_content.add_widget(pwd_box)
+
+        settings_tab.add_widget(settings_content)
+
+        # Ajouter les tabs
+        tabs.add_widget(main_tab)
+        tabs.add_widget(settings_tab)
+        layout.add_widget(tabs)
+
+        self.add_widget(layout)
+
+    def get_button_color(self, setting_name):
+        return (0.2, 0.8, 0.2, 1) if self.settings.get(setting_name, False) else (0.8, 0.2, 0.2, 1)
+
+    def change_language(self, lang_code):
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(('10.254.254.254', 1))
-            IP = s.getsockname()[0]
+            with (os.path.join(os.path.dirname(__file__), 'kahiin/settings.json'), 'r') as f:
+                settings = json.load(f)
+            settings['language'] = lang_code
+            with (os.path.join(os.path.dirname(__file__), 'kahiin/settings.json'), 'w') as f:
+                json.dump(settings, f)
+            toast(f"Langue changée en {lang_code}")
         except Exception as e:
-            logging.error(f"IP retrieval error: {e}")
-            IP = '127.0.0.1'
-        finally:
-            s.close()
-        return IP
+            toast(f"Erreur: {str(e)}")
 
+    def change_password(self, new_password):
+        try:
+            hashed_password = hashlib.sha256(new_password.encode()).hexdigest()
+            with open(os.path.join(os.path.dirname(__file__), 'kahiin/settings.json'), 'r') as f:
+                settings = json.load(f)
+            settings['adminPassword'] = hashed_password
+            with open(os.path.join(os.path.dirname(__file__), 'kahiin/settings.json'), 'w') as f:
+                json.dump(settings, f)
+            toast("Mot de passe changé avec succès")
+        except Exception as e:
+            print(f"Erreur: {str(e)}")
+
+    # Nouvelles méthodes déplacées et adaptées
     def start_flask_server(self):
         try:
-            # Import Flask app here to avoid circular imports
-            from kahiin.app import start_flask
-            
-            # Run Flask in a separate thread
             self.flask_thread = threading.Thread(target=start_flask, daemon=True)
             self.flask_thread.start()
             logging.info("Flask server started successfully")
@@ -94,16 +269,13 @@ class MainApp(App):
     def create_android_service(self):
         if platform == 'android':
             try:
-                # Import Android-specific classes
                 PythonService = autoclass('org.kahiin.android.WebServerService')
                 Context = autoclass('android.content.Context')
                 NotificationManager = autoclass('android.app.NotificationManager')
                 NotificationChannel = autoclass('android.app.NotificationChannel')
                 
-                # Get the service
                 service = PythonService()
                 
-                # Create notification channel
                 channel_id = "kahiin_service_channel"
                 channel_name = "Kahiin Web Server"
                 channel = NotificationChannel(
@@ -112,11 +284,9 @@ class MainApp(App):
                     NotificationManager.IMPORTANCE_LOW
                 )
                 
-                # Get notification manager and create channel
                 notification_manager = service.getSystemService(Context.NOTIFICATION_SERVICE)
                 notification_manager.createNotificationChannel(channel)
                 
-                # Additional service setup can be added here
                 logging.info("Android service created successfully")
                 return service
             except Exception as e:
@@ -129,12 +299,14 @@ class MainApp(App):
             self.start_flask_server()
             if platform == 'android':
                 self.service = self.create_android_service()
-                
-                # Request battery optimization exemption
                 self.request_ignore_battery_optimizations()
+            # Désactiver le bouton et le griser
+            self.start_button.disabled = True
+            self.start_button.md_bg_color = (0.5, 0.5, 0.5, 1)
         except Exception as e:
             logging.error(f"Startup error: {e}")
             traceback.print_exc()
+
     if platform == 'android':
         @run_on_ui_thread
         def request_ignore_battery_optimizations(self):
@@ -144,10 +316,7 @@ class MainApp(App):
                 Uri = autoclass('android.net.Uri')
                 PythonActivity = autoclass('org.kahiin.android.WebServerActivity')
 
-                # Get the current activity
                 context = PythonActivity.mActivity
-                
-                # Request to ignore battery optimizations
                 intent = Intent(Intent.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                 context.startActivity(intent)
                 
@@ -156,48 +325,54 @@ class MainApp(App):
                 logging.error(f"Battery optimization request failed: {e}")
                 traceback.print_exc()
 
+    def stop_app(self, *args):
+        try:
+            logging.info("Stopping application...")
+            
+            if self.flask_thread:
+                logging.info("Attempting to stop Flask server")
+            
+            if self.service and platform == 'android':
+                logging.info("Stopping Android service")
+                self.service.stopForeground(True)
+            
+            self.app.stop()  # Utilise la référence à l'app principale
+        except Exception as e:
+            logging.error(f"Error during stop: {e}")
+            traceback.print_exc()
+            sys.exit(0)
+
+    def toggle_setting(self, setting_name, button):
+        try:
+            self.settings[setting_name] = not self.settings.get(setting_name, False)
+            with open(os.path.join(os.path.dirname(__file__), 'kahiin', 'settings.json'), 'w') as f:
+                json.dump(self.settings, f, indent=4)
+            # Mettre à jour la couleur du bouton
+            button.md_bg_color = self.get_button_color(setting_name)
+            toast(f"Paramètre {setting_name} {'activé' if self.settings[setting_name] else 'désactivé'}")
+        except Exception as e:
+            toast(f"Erreur: {str(e)}")
+
+class MainApp(MDApp):
+    def __init__(self, **kwargs):
+        super(MainApp, self).__init__(**kwargs)
+        self.flask_thread = None
+        self.service = None
+        
+        # Prevent app from closing on back button
+        Window.bind(on_keyboard=self.on_key)
+
+    def on_key(self, window, key, *args):
+        # Prevent back button from closing the app
+        if key == 27:  # ESC/Back button
+            return True
+        return False
+
     def build(self):
         # Create screen manager
         sm = ScreenManager()
-        
-        # Create main screen
-        main_screen = MainScreen(name='main_screen')
-        
-        # Create layout
-        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
-        
-        # IP Address Label
-        ip_label = Label(
-            text=f"Local IP: {self.local_ip}", 
-            font_size='20sp',
-            size_hint_y=None, 
-            height=50
-        )
-        layout.add_widget(ip_label)
-        
-        # Start Server Button (using SafeButton)
-        start_button = SafeButton(
-            text='Start Server', 
-            on_press=self.on_start_button,
-            size_hint_y=None, 
-            height=200
-        )
-        layout.add_widget(start_button)
-        
-        # Exit Button (using SafeButton)
-        exit_button = SafeButton(
-            text='Exit App', 
-            on_press=self.stop,
-            size_hint_y=None, 
-            height=200
-        )
-        layout.add_widget(exit_button)
-        
-        # Add layout to main screen
-        main_screen.add_widget(layout)
-        
-        # Add screen to screen manager
-        sm.add_widget(main_screen)
+    
+        sm.add_widget(MainScreen())
         
         return sm
 

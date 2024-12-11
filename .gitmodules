@@ -1,4 +1,4 @@
 [submodule "kahiin"]
 	path = kahiin
 	url = https://github.com/kahiin-project/kahiin.git
-	branch = master
+	branch = main
