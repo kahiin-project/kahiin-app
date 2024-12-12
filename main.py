@@ -32,7 +32,7 @@ import json
 from kahiin.app import start_flask #, stop_flask
 import hashlib
 from kivy.core.text import LabelBase
-
+from kivy.metrics import dp
 
 # set the current dir to the one containing this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -102,13 +102,13 @@ class MainScreen(MDScreen):
         
         # Message de garde en plein écran
         warning_label = MDLabel(
-            text=f"[size=30px][font=MaterialDesignIcons]{md_icons['alert-rhombus']}[/font][/size] [size=20px]Gardez l'application en plein écran pour éviter qu'Android ne la ferme[/size]",
+            text=f"[size={dp(30)}px][font=MaterialDesignIcons]{md_icons['alert-rhombus']}[/font][/size] [size={dp(20)}px]Gardez l'application en plein écran pour éviter qu'Android ne la ferme[/size]",
             font_name='NotoSans',
             theme_text_color="Error", 
             halign='center',
             markup=True, 
             size_hint_y=None,
-            height=50
+            height=dp(50)
         )
         main_content.add_widget(warning_label)
 
@@ -117,7 +117,7 @@ class MainScreen(MDScreen):
             text=f"IP Locale: {get_local_ip()}",
             font_style='H5',
             size_hint_y=None,
-            height=50
+            height=dp(50)
         )
         main_content.add_widget(ip_label)
 
@@ -128,7 +128,7 @@ class MainScreen(MDScreen):
             on_press=self.on_start_button, 
             md_bg_color=(0.2, 0.8, 0.2, 1),
             size_hint_y=None,
-            height=50
+            height=dp(50)
         )
         main_content.add_widget(self.start_button)
 
@@ -137,7 +137,7 @@ class MainScreen(MDScreen):
             on_press=self.on_stop_button,
             md_bg_color=(0.5, 0.5, 0.5, 1),
             disabled=True,
-            height=50,
+            height=dp(50),
             size_hint_y=None,
         )
 
@@ -151,7 +151,7 @@ class MainScreen(MDScreen):
             on_press=self.stop_app, 
             md_bg_color=(0.8, 0.2, 0.2, 1),
             size_hint_y=None,
-            height=50
+            height=dp(50)
         )
         main_content.add_widget(exit_button)
         main_tab.add_widget(main_content)
@@ -166,15 +166,15 @@ class MainScreen(MDScreen):
             'en': {'icon': md_icons["tea"], 'name': 'English'},
             'es': {'icon': md_icons["weather-sunny"], 'name': 'Español'}
         }
-        lang_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+        lang_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=dp(60))
         self.btn_list = []
         for lang_code, lang_info in languages.items():
             lang_btn = MDRaisedButton(
-                text=f"[size=20px][font=MaterialDesignIcons]{lang_info['icon']}[/font][/size] {lang_info['name']}",
+                text=f"[size={dp(20)}px][font=MaterialDesignIcons]{lang_info['icon']}[/font][/size] {lang_info['name']}",
                 on_press=lambda x, lc=lang_code: self.change_language(lc),
                 font_name='NotoSans',
                 size_hint_y=None,
-                height=50
+                height=dp(50)
 
             )
             self.btn_list.append(lang_btn)
@@ -197,7 +197,7 @@ class MainScreen(MDScreen):
             text="Mode dyslexique",
             on_press=lambda x: self.toggle_setting('dyslexicMode', self.dyslexic_btn),
             size_hint_y=None,
-            height=50,
+            height=dp(50),
             md_bg_color=self.get_button_color('dyslexicMode')
         )
         
@@ -205,7 +205,7 @@ class MainScreen(MDScreen):
             text="Finir quand tous ont répondu",
             on_press=lambda x: self.toggle_setting('endOnAllAnswered', self.endOnAllAnswered_btn),
             size_hint_y=None,
-            height=50,
+            height=dp(50),
             md_bg_color=self.get_button_color('endOnAllAnswered')
         )
 
@@ -213,7 +213,7 @@ class MainScreen(MDScreen):
             text="Ordre aléatoire",
             on_press=lambda x: self.toggle_setting('randomOrder', self.randomOrder_btn),
             size_hint_y=None,
-            height=50,
+            height=dp(50),
             md_bg_color=self.get_button_color('randomOrder')
         )
 
@@ -223,7 +223,7 @@ class MainScreen(MDScreen):
         settings_content.add_widget(access_box)
 
         # Section mot de passe avec bouton de validation
-        pwd_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+        pwd_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=dp(60))
         
         self.password_field = MDTextField(
             hint_text="Nouveau mot de passe admin",
