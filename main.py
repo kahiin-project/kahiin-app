@@ -29,12 +29,15 @@ from kivymd.toast import toast
 from kivymd.uix.list import OneLineListItem
 from kivymd.icon_definitions import md_icons
 import json
-from kahiin.app import start_flask, stop_flask
+from kahiin.app import start_flask #, stop_flask
 import hashlib
 from kivy.core.text import LabelBase
 
-LabelBase.register(name='NotoEmoji', fn_regular='NotoColorEmoji.ttf')
-LabelBase.register(name='NotoSans', fn_regular='NotoSans.ttf')
+
+# set the current dir to the one containing this file
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+LabelBase.register(name='NotoSans', fn_regular=os.path.join(os.path.dirname(__file__), 'NotoSans.ttf'))
+LabelBase.register(name='MaterialIcons', fn_regular=os.path.join(os.path.dirname(__file__), 'MaterialDesignIcons.ttf'))
 # Logging setup
 logging.basicConfig(level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s',
