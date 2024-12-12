@@ -25,8 +25,11 @@ from kivymd.uix.tab import MDTabs, MDTabsBase
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.textfield import MDTextField
+from kivymd.toast import toast
+from kivymd.uix.list import OneLineListItem
+from kivymd.icon_definitions import md_icons
 import json
-from kahiin.app import start_flask
+from kahiin.app import start_flask, stop_flask
 import hashlib
 from kivy.core.text import LabelBase
 
@@ -96,11 +99,12 @@ class MainScreen(MDScreen):
         
         # Message de garde en plein écran
         warning_label = MDLabel(
-            text='[size=20sp][font=NotoEmoji]⚠️[/font][/size] Gardez l\'application en plein écran pour éviter qu\'Android ne la ferme',
+            text=f"[size=30px][font=MaterialDesignIcons]{md_icons['alert-rhombus']}[/font][/size] [size=20px]Gardez l'application en plein écran pour éviter qu'Android ne la ferme[/size]",
             font_name='NotoSans',
-            theme_text_color="Hint",
+            theme_text_color="Error", 
+            halign='center',
+            markup=True, 
             size_hint_y=None,
-
             height=50
         )
         main_content.add_widget(warning_label)
@@ -118,18 +122,30 @@ class MainScreen(MDScreen):
         self.start_button = SafeButton(
             text='Démarrer le serveur',
             icon='server-network',
-            on_press=self.on_start_button,  # Changé ici
+            on_press=self.on_start_button, 
             md_bg_color=(0.2, 0.8, 0.2, 1),
             size_hint_y=None,
             height=50
         )
         main_content.add_widget(self.start_button)
 
-        # Exit Button stylisé avec la bonne référence
+        self.stop_button = SafeButton(
+            text='Arrêter le serveur',
+            on_press=self.on_stop_button,
+            md_bg_color=(0.5, 0.5, 0.5, 1),
+            disabled=True,
+            height=50,
+            size_hint_y=None,
+        )
+
+        # main_content.add_widget(self.stop_button)
+
+
+
         exit_button = SafeButton(
             text='Quitter',
             icon='exit-to-app',
-            on_press=self.stop_app,  # Changé ici
+            on_press=self.stop_app, 
             md_bg_color=(0.8, 0.2, 0.2, 1),
             size_hint_y=None,
             height=50
@@ -143,19 +159,22 @@ class MainScreen(MDScreen):
 
         # Sélection de langue avec drapeaux
         languages = {
-            'fr': {'icon': '🇫🇷', 'name': 'Français'},
-            'en': {'icon': '🇬🇧', 'name': 'English'},
-            'es': {'icon': '🇪🇸', 'name': 'Español'}
+            'fr': {'icon': md_icons["baguette"], 'name': 'Français'},
+            'en': {'icon': md_icons["tea"], 'name': 'English'},
+            'es': {'icon': md_icons["weather-sunny"], 'name': 'Español'}
         }
         lang_box = MDBoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+        self.btn_list = []
         for lang_code, lang_info in languages.items():
             lang_btn = MDRaisedButton(
-                text=f"[font=NotoEmoji][size=20sp]{lang_info['icon']}[/font][/size] {lang_info['name']}",
+                text=f"[size=20px][font=MaterialDesignIcons]{lang_info['icon']}[/font][/size] {lang_info['name']}",
                 on_press=lambda x, lc=lang_code: self.change_language(lc),
                 font_name='NotoSans',
                 size_hint_y=None,
                 height=50
+
             )
+            self.btn_list.append(lang_btn)
             lang_box.add_widget(lang_btn)
         settings_content.add_widget(lang_box)
 
@@ -195,7 +214,6 @@ class MainScreen(MDScreen):
             md_bg_color=self.get_button_color('randomOrder')
         )
 
-        
         access_box.add_widget(self.dyslexic_btn)
         access_box.add_widget(self.endOnAllAnswered_btn)
         access_box.add_widget(self.randomOrder_btn)
@@ -216,7 +234,7 @@ class MainScreen(MDScreen):
             on_press=lambda x: self.change_password(self.password_field.text),
             size_hint_x=0.3
         )
-        
+        self.btn_list.extend([self.dyslexic_btn,self.endOnAllAnswered_btn,self.randomOrder_btn, pwd_button])
         pwd_box.add_widget(self.password_field)
         pwd_box.add_widget(pwd_button)
         settings_content.add_widget(pwd_box)
@@ -256,7 +274,6 @@ class MainScreen(MDScreen):
         except Exception as e:
             print(f"Erreur: {str(e)}")
 
-    # Nouvelles méthodes déplacées et adaptées
     def start_flask_server(self):
         try:
             self.flask_thread = threading.Thread(target=start_flask, daemon=True)
@@ -265,6 +282,9 @@ class MainScreen(MDScreen):
         except Exception as e:
             logging.error(f"Failed to start Flask server: {e}")
             traceback.print_exc()
+
+
+
 
     def create_android_service(self):
         if platform == 'android':
@@ -303,9 +323,21 @@ class MainScreen(MDScreen):
             # Désactiver le bouton et le griser
             self.start_button.disabled = True
             self.start_button.md_bg_color = (0.5, 0.5, 0.5, 1)
+            for btn in self.btn_list:
+                btn.disabled = True
+                btn.md_color = (0.5, 0.5, 0.5, 1)
+            self.password_field.disabled = True
+            self.stop_button.disabled = False
+            self.stop_button.md_color = (0.8, 0.2, 0.2, 1)
+
         except Exception as e:
             logging.error(f"Startup error: {e}")
             traceback.print_exc()
+    
+    def on_stop_button(self, *args):
+        self.stop_flask_server()
+        self.stop_button.md_color = (0.5, 0.5, 0.5, 1)
+        self.stop_button.disabled = True
 
     if platform == 'android':
         @run_on_ui_thread
