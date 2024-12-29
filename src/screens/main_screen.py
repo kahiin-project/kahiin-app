@@ -27,6 +27,10 @@ from kahiin.app import start_flask
 from src.ui.Tab import Tab
 from src.ui.SafeButton import SafeButton
 
+if platform == 'android':
+    from jnius import autoclass
+    from android.runnable import run_on_ui_thread
+    
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

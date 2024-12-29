@@ -58,7 +58,7 @@ def main():
     setup_signal_handlers()
     
     if platform == 'android':
-        from android_utils import request_android_permissions
+        from src.android_utils import request_android_permissions
         request_android_permissions()
     
     MainApp().run()
