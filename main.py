@@ -14,7 +14,6 @@ from src.utils import get_app_glossary
 from src.services.signal_handler import setup_signal_handlers
 
 import src.config
-
 glossary = get_app_glossary()
 
 class MainApp(MDApp):

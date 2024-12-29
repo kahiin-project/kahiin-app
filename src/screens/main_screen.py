@@ -45,7 +45,7 @@ class MainScreen(MDScreen):
         self.glossary = glossary
         self.name = "main_screen"
         self.app = MDApp.get_running_app()
-        self.kahiin_settings_path = os.path.join(os.path.dirname(__file__), '..', '..', 'kahiin', 'settings.json')
+        self.kahiin_settings_path = "settings.json"
 
         # Charger les paramètres actuels
         with open(self.kahiin_settings_path, 'r') as f:
@@ -68,12 +68,12 @@ class MainScreen(MDScreen):
         
         # Fullscreen warning message
         warning_label = MDLabel(
-            text=f"[size={dp(30)}px][font=MaterialDesignIcons]{md_icons['alert-rhombus']}[/font][/size] [size={dp(20)}px]" + self.glossary["KeepAppWake"] + "[/size]",
+            text=f"[size={dp(30)}px][font=MaterialIcons]{md_icons['alert-rhombus']}[/font][/size] [size={dp(20)}px]" + self.glossary["KeepAppWake"] + "[/size]",
             theme_text_color="Error", 
             halign='center',
             markup=True, 
             size_hint_y=None,
-            height=dp(50),
+            # height=dp(50),
             font_name='Bagnard'
         )
         main_content.add_widget(warning_label)
@@ -144,7 +144,7 @@ class MainScreen(MDScreen):
         self.lang_btn_list = []
         for lang_code, lang_info in languages.items():
             lang_btn = self.create_button(
-                text=f"[size={dp(20)}px][font=MaterialDesignIcons]{lang_info['icon']}[/font][/size] {lang_info['name']}",
+                text=f"[size={dp(20)}px][font=MaterialIcons]{lang_info['icon']}[/font][/size] {lang_info['name']}",
                 on_press=lambda x, lc=lang_code: self.change_language(lc),
                 md_bg_color=self.get_language_color(lang_code),
                 font_name='Bagnard'
