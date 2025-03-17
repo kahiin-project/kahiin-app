@@ -10,7 +10,7 @@ from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 from kahiin.app import start_flask
 from src.screens.main_screen import MainScreen
-from src.utils import get_app_glossary
+from src.utils.Settings import get_app_glossary
 from src.services.signal_handler import setup_signal_handlers
 
 import src.config
