@@ -27,6 +27,7 @@ from kahiin.app import start_flask
 from src.ui.Tab import Tab
 from src.ui.SafeButton import SafeButton
 
+from src.utils.Settings import get_kahiin_settings
 if platform == 'android':
     from jnius import autoclass
     from android.runnable import run_on_ui_thread
@@ -49,7 +50,7 @@ class MainScreen(MDScreen):
         self.glossary = glossary
         self.name = "main_screen"
         self.app = MDApp.get_running_app()
-        self.kahiin_settings_path = "settings.json"
+        self.kahiin_settings_path = os.path.join('kahiin','settings.json')
 
         # Charger les paramètres actuels
         with open(self.kahiin_settings_path, 'r') as f:
