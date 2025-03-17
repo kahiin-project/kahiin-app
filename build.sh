@@ -17,8 +17,8 @@ if [ ! -f .already ]; then
 
   python3 -m venv venv
   source venv/bin/activate
-  pip3 install --upgrade Cython==0.29.33 virtualenv buildozer setuptools
-
+  pip install -r requirements.txt
+  pip install -r kahiin/requirements.txt
   source ~/.bashrc
   git submodule update --init --recursive
 fi
