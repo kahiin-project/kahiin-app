@@ -5,7 +5,7 @@ from kivy.metrics import dp
 from kivy.animation import Animation
 
 class Tab(MDFloatLayout, MDTabsBase):
-    """Classe Tab améliorée avec animation et style moderne"""
+    """Enhanced Tab class with animation and modern style"""
     content = ObjectProperty(None)
     icon = StringProperty("")
     
@@ -13,7 +13,7 @@ class Tab(MDFloatLayout, MDTabsBase):
         self.opacity = 0
         self.padding = [dp(15), dp(10)]
         
-        # Permettre au texte de s'afficher sur plusieurs lignes
+        # Allow text to display on multiple lines
         self.tab_label.markup = True
         self.tab_label.text_size = (None, None)
         self.tab_label.halign = 'center'

@@ -17,10 +17,10 @@ class SafeButton(MDRaisedButton):
         self.shadow_offset = (0, 0)
         self._original_color = None
         
-        # Permettre aux boutons de prendre toute la largeur
+        # Allow buttons to take full width
         self.size_hint_x = 1
         
-        # Permettre au texte de s'afficher sur plusieurs lignes
+        # Allow text to display on multiple lines
         self.halign = 'center'
         self.line_height = 1.2
         self.allow_stretch = True
@@ -32,13 +32,13 @@ class SafeButton(MDRaisedButton):
         if self._original_color is None:
             self._original_color = self.md_bg_color.copy()
         
-        # Effet d'animation quand on appuie (sans ombre)
+        # Animation effect when pressed (without shadow)
         darker_color = [max(c * 0.85, 0) for c in self.md_bg_color[:3]] + [self.md_bg_color[3]]
         anim = Animation(md_bg_color=darker_color, duration=0.1)
         anim.start(self)
         
     def on_release(self):
-        # Restauration après appui
+        # Restoration after press
         if self._original_color:
             anim = Animation(md_bg_color=self._original_color, duration=0.1)
             anim.start(self)

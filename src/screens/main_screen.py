@@ -38,11 +38,11 @@ if platform == 'android':
     from jnius import autoclass
     from android.runnable import run_on_ui_thread
 
-# Palette de couleurs moderne avec gris foncé au lieu de violet
+# Modern color palette with dark gray instead of purple
 COLORS = {
-    'primary': get_color_from_hex("#333333"),  # Gris foncé au lieu de violet
-    'primary_dark': get_color_from_hex("#212121"),  # Gris très foncé
-    'accent': get_color_from_hex("#5D5D5D"),  # Gris moyen
+    'primary': get_color_from_hex("#333333"),  # Dark gray instead of purple
+    'primary_dark': get_color_from_hex("#212121"),  # Very dark gray
+    'accent': get_color_from_hex("#5D5D5D"),  # Medium gray
     'background': get_color_from_hex("#FFFFFF"),
     'card': get_color_from_hex("#F5F5F5"),
     'text': get_color_from_hex("#333333"),
@@ -72,18 +72,18 @@ class MainScreen(MDScreen):
         self.app = MDApp.get_running_app()
         self.kahiin_settings_path = os.path.join('kahiin','settings.json')
         
-        # Variables pour la liste déroulante des langues
+        # Variables for language dropdown
         self.current_language = None
         self.language_menu = None
 
-        # Définir la couleur de fond de l'écran
+        # Set the background color of the screen
         self.md_bg_color = COLORS['background']
 
-        # Charger les paramètres actuels
+        # Load current settings
         with open(self.kahiin_settings_path, 'r') as f:
             self.settings = json.load(f)
             
-        # Charger les paramètres de l'application
+        # Load application settings
         try:
             with open('settings.json', 'r') as f:
                 self.app_settings = json.load(f)
@@ -96,15 +96,15 @@ class MainScreen(MDScreen):
         self.wakelock_acquired = False
         self.wakelock = None
 
-        # Initialiser l'interface
+        # Initialize the interface
         self._init_ui()
     
     def _init_ui(self):
-        """Initialiser l'interface utilisateur"""
+        """Initialize the user interface"""
         # Create the main layout
         layout = MDBoxLayout(orientation='vertical')
         
-        # Ajouter une barre d'outils en haut
+        # Add a toolbar at the top
         toolbar = MDTopAppBar(
             title="Kahiin App",
             elevation=0,
@@ -120,7 +120,7 @@ class MainScreen(MDScreen):
             text_color_active=get_color_from_hex("#FFFFFF"),
             indicator_color=COLORS['accent'],
             elevation=0,
-            tab_hint_x=0.5  # Chaque onglet prend la moitié de la largeur
+            tab_hint_x=0.5  # Each tab takes half of the width
         )
         
         # Main tab
@@ -135,25 +135,25 @@ class MainScreen(MDScreen):
             elevation=0,
             radius=dp(5),
             ripple_behavior=True,
-            size_hint_y=1  # Prend tout l'espace disponible
+            size_hint_y=1  # Takes all available space
         )
         
-        # IP Address Label with modern style - mettre l'IP en premier et plus grande
+        # IP Address Label with modern style - put IP first and larger
         ip_box = MDBoxLayout(
             orientation='vertical',
-            size_hint_y=1,  # Utiliser tout l'espace disponible
-            padding=[dp(10), dp(30), dp(10), dp(30)],  # Grand padding vertical
+            size_hint_y=1,  # Use all available space
+            padding=[dp(10), dp(30), dp(10), dp(30)],  # Large vertical padding
         )
 
         ip_label = MDLabel(
             text=f"{get_local_ip()}",
             font_style='H3',
-            size_hint_y=1,  # Prend tout l'espace restant
+            size_hint_y=1,  # Takes all remaining space
             font_name='Bagnard',
             halign='center',
             valign='middle',
             theme_text_color="Primary",
-            font_size=dp(40),  # Taille de police encore plus grande
+            font_size=dp(40),  # Even larger font size
             bold=True,
         )
 
@@ -166,22 +166,22 @@ class MainScreen(MDScreen):
             theme_text_color="Error", 
             halign='center',
             markup=True, 
-            size_hint_y=None,  # Hauteur fixe au lieu d'une proportion
-            height=dp(40),  # Hauteur fixe réduite
+            size_hint_y=None,  # Fixed height instead of proportion
+            height=dp(40),  # Reduced fixed height
             font_name='Bagnard',
-            padding=(0, dp(5))  # Padding réduit
+            padding=(0, dp(5))  # Reduced padding
         )
         server_card.add_widget(warning_label)
 
         # Button Card for server controls
         button_card = MDCard(
             orientation="vertical",
-            padding=[dp(16), dp(5), dp(16), dp(16)],  # Réduire le padding en haut
+            padding=[dp(16), dp(5), dp(16), dp(16)],  # Reduce padding at the top
             spacing=dp(10),
             elevation=0,
             radius=dp(5),
             size_hint_y=None,
-            height=dp(165),  # Réduire la hauteur pour tenir compte du bouton supprimé
+            height=dp(165),  # Reduce height to account for removed button
             md_bg_color=get_color_from_hex("#F4F4F4"),
         )
 
@@ -192,7 +192,7 @@ class MainScreen(MDScreen):
             on_press=self.on_start_button,
             md_bg_color=COLORS['success'],
             font_name='Bagnard',
-            height=dp(45)  # Réduire la hauteur du bouton
+            height=dp(45)  # Reduce button height
         )
         button_card.add_widget(self.start_button)
 
@@ -202,7 +202,7 @@ class MainScreen(MDScreen):
             on_press=self.toggle_wakelock,
             md_bg_color=COLORS['info'],
             font_name='Bagnard',
-            height=dp(45)  # Hauteur cohérente
+            height=dp(45)  # Consistent height
         )
         button_card.add_widget(self.wakelock_button)
 
@@ -213,7 +213,7 @@ class MainScreen(MDScreen):
             on_press=self.stop_app,
             md_bg_color=COLORS['error'],
             font_name='Bagnard',
-            height=dp(45)  # Hauteur cohérente
+            height=dp(45)  # Consistent height
         )
         button_card.add_widget(exit_button)
         
@@ -224,7 +224,7 @@ class MainScreen(MDScreen):
         # Settings tab
         settings_tab = Tab(title=self.glossary["SettingsTab"], icon="cog")
         
-        # Ajouter un ScrollView pour permettre le défilement
+        # Add a ScrollView to allow scrolling
         scroll_view = ScrollView(
             do_scroll_x=False,
             do_scroll_y=True,
@@ -238,10 +238,10 @@ class MainScreen(MDScreen):
             padding=dp(20), 
             spacing=dp(15),
             size_hint_y=None,
-            height=dp(600)  # Hauteur suffisante pour contenir tout le contenu
+            height=dp(600)  # Sufficient height to contain all content
         )
         
-        # Définir la hauteur en fonction du contenu
+        # Set height based on content
         settings_content.bind(minimum_height=settings_content.setter('height'))
         
         # Card for language selection
@@ -264,11 +264,11 @@ class MainScreen(MDScreen):
             height=dp(30),
             font_name='Bagnard',
             theme_text_color="Secondary",
-            padding=(0, dp(8))  # Ajouter un padding vertical uniforme
+            padding=(0, dp(8))  # Add uniform vertical padding
         )
         lang_card.add_widget(lang_title)
         
-        # Bouton pour le menu déroulante des langues
+        # Button for language dropdown
         languages = {
             'fr': {'icon': md_icons["baguette"], 'name': 'Français'},
             'en': {'icon': md_icons["tea"], 'name': 'English'},
@@ -277,7 +277,7 @@ class MainScreen(MDScreen):
             'de': {'icon': md_icons["sausage"], 'name': 'Deutsch'}
         }
         
-        # Bouton pour afficher la liste déroulante
+        # Button to display dropdown
         self.lang_dropdown_button = self.create_button(
             text=f"[size={dp(20)}px][font=MaterialIcons]{languages[self.current_language]['icon']}[/font][/size] {languages[self.current_language]['name']}",
             on_press=self.show_language_menu,
@@ -288,7 +288,7 @@ class MainScreen(MDScreen):
         
         lang_card.add_widget(self.lang_dropdown_button)
         
-        # Créer les éléments du menu
+        # Create menu items
         menu_items = []
         for lang_code, lang_info in languages.items():
             menu_items.append({
@@ -298,7 +298,7 @@ class MainScreen(MDScreen):
                 "icon": lang_info['icon']
             })
             
-        # Créer le menu déroulant
+        # Create dropdown menu
         self.language_menu = MDDropdownMenu(
             caller=self.lang_dropdown_button,
             items=menu_items,
@@ -329,7 +329,7 @@ class MainScreen(MDScreen):
             height=dp(30),
             font_name='Bagnard',
             theme_text_color="Secondary",
-            padding=(0, dp(8))  # Ajouter un padding vertical uniforme
+            padding=(0, dp(8))  # Add uniform vertical padding
         )
         access_card.add_widget(access_label)
 
@@ -369,8 +369,8 @@ class MainScreen(MDScreen):
         # Card for password
         pwd_card = MDCard(
             orientation="vertical",
-            padding=[dp(16), dp(35), dp(16), dp(10)],  # Augmenter encore le padding en haut
-            spacing=dp(0),  # Enlever l'espacement entre les éléments
+            padding=[dp(16), dp(35), dp(16), dp(10)],  # Augment padding at the top
+            spacing=dp(0),  # Remove spacing between elements
             elevation=0,
             radius=dp(5),
             size_hint_y=None,
@@ -386,7 +386,7 @@ class MainScreen(MDScreen):
             height=dp(30),
             font_name='Bagnard',
             theme_text_color="Secondary",
-            padding=(0, 0)  # Supprimer le padding du titre
+            padding=(0, 0)  # Remove padding from title
         )
         pwd_card.add_widget(pwd_title)
         
@@ -396,7 +396,7 @@ class MainScreen(MDScreen):
         self.password_field = MDTextField(
             hint_text=self.glossary['ChangePassword'],
             password=True,
-            size_hint_x=1,  # Prend toute la largeur
+            size_hint_x=1,  # Take full width
             font_name='Bagnard',
             mode="rectangle",
             line_color_normal=COLORS['primary'],
@@ -415,7 +415,7 @@ class MainScreen(MDScreen):
         pwd_card.add_widget(pwd_box)
         settings_content.add_widget(pwd_card)
 
-        # Ajouter le contenu au ScrollView
+        # Add content to ScrollView
         scroll_view.add_widget(settings_content)
         settings_tab.add_widget(scroll_view)
 
@@ -424,16 +424,16 @@ class MainScreen(MDScreen):
         tabs.add_widget(settings_tab)
         layout.add_widget(tabs)
 
-        # Animation d'entrée
+        # Entrance animation
         self.opacity = 0
         self.add_widget(layout)
         Clock.schedule_once(self.animate_screen, 0.1)
         
-        # Appliquer la police Bagnard à tous les widgets de texte
+        # Apply Bagnard font to all text widgets
         Clock.schedule_once(lambda dt: self.apply_font_to_all_widgets(), 0.2)
     
     def show_language_menu(self, instance):
-        # S'assurer que tous les éléments du menu utilisent la police Bagnard
+        # Ensure all menu items use Bagnard font
         for item in self.language_menu.items:
             item['font_name'] = 'Bagnard'
         self.language_menu.open()
@@ -461,7 +461,7 @@ class MainScreen(MDScreen):
             self.app_settings = json.load(f)
 
     def update_kahiin_settings(self):
-        # Charger les paramètres depuis le fichier
+        # Load settings from file
         with open(self.kahiin_settings_path, 'r') as f:
             self.settings = json.load(f)
 
@@ -474,7 +474,7 @@ class MainScreen(MDScreen):
         return (0.2, 0.8, 0.2, 1) if lang_code == self.app_settings.get('language') else (0.8, 0.2, 0.2, 1)
 
     def change_language(self, lang_code):
-        # Sauvegarder la langue dans les paramètres
+        # Save language in settings
         with open('settings.json', 'r') as f:
             settings = json.load(f)
         old_lang = settings['language']
@@ -483,32 +483,32 @@ class MainScreen(MDScreen):
         with open('settings.json', 'w') as f:
             json.dump(settings, f)
         
-        # Charger tout le glossaire pour pouvoir accéder à la nouvelle langue
+        # Load all glossary to be able to access the new language
         with open('glossary.json', 'r') as f:
             all_glossaries = json.load(f)
         
-        # Mettre à jour le glossaire avec la langue sélectionnée
+        # Update glossary with selected language
         self.glossary = all_glossaries[lang_code]
         
-        # Créer un message pour afficher le changement
+        # Create message to display change
         message = self.glossary["LanguageChanged"]
         
-        # Option 1: Recréer l'interface complète
-        # Cette approche est la plus fiable mais peut être un peu lourde
+        # Option 1: Recreate complete interface
+        # This approach is the most reliable but can be a bit heavy
         self.clear_widgets()
         self._init_ui()
         
-        # Option 2: Mettre à jour les textes de l'interface existante
-        # Plus légère mais potentiellement moins fiable selon la complexité de l'interface
+        # Option 2: Update existing interface texts
+        # Lighter but potentially less reliable depending on interface complexity
         # self._update_ui_texts()
         
-        # Notification de changement
+        # Change notification
         toast(message)
 
     def _update_ui_texts(self):
-        """Mettre à jour tous les textes de l'interface avec la langue actuelle"""
-        # Accéder aux onglets
-        # Trouver les objets Tab dans la hiérarchie
+        """Update all interface texts with current language"""
+        # Access tabs
+        # Find Tab objects in hierarchy
         for widget in self.walk():
             if isinstance(widget, Tab):
                 if hasattr(widget, 'icon') and widget.icon:
@@ -517,16 +517,16 @@ class MainScreen(MDScreen):
                     elif "cog" in widget.icon.lower():
                         widget.title = self.glossary["SettingsTab"]
         
-        # Textes de la page principale - trouver les widgets directement
+        # Main page texts - find widgets directly
         for widget in self.walk():
             if isinstance(widget, MDLabel):
-                # Mise à jour de l'étiquette d'avertissement
+                # Update warning label
                 if widget.theme_text_color == "Error" and "[font=MaterialIcons]" in widget.text:
                     widget.text = f"[size={dp(28)}px][font=MaterialIcons]{md_icons['alert-rhombus']}[/font][/size] [size={dp(18)}px]" + self.glossary["KeepAppWake"] + "[/size]"
-                # Mise à jour de l'étiquette IP
+                # Update IP label
                 elif "IP" in widget.text:
                     widget.text = f"IP {self.glossary['Local']}: {get_local_ip()}"
-                # Mise à jour des titres des sections
+                # Update section titles
                 elif widget.text == self.glossary.get("AccessibilitySettings") or "Accessibilité" in widget.text:
                     widget.text = self.glossary["AccessibilitySettings"]
                 elif widget.text == self.glossary.get("LanguageTitle") or "Langue" in widget.text:
@@ -536,23 +536,23 @@ class MainScreen(MDScreen):
                 elif widget.text == self.glossary.get("ChangePassword") or "mot de passe" in widget.text.lower():
                     widget.text = self.glossary["ChangePassword"]
         
-        # Boutons
+        # Buttons
         self.start_button.text = self.glossary["StartServer"]
         if self.wakelock_acquired:
             self.wakelock_button.text = self.glossary["DisableWakelock"]
         else:
             self.wakelock_button.text = self.glossary["EnableWakelock"]
         
-        # Boutons d'accessibilité
+        # Accessibility buttons
         self.dyslexic_btn.text = self.glossary["DyslexicMode"]
         self.endOnAllAnswered_btn.text = self.glossary["EndOnAllAnswered"]
         self.randomOrder_btn.text = self.glossary["RandomOrder"]
         
-        # Champ de mot de passe
+        # Password field
         if hasattr(self, 'password_field'):
             self.password_field.hint_text = self.glossary["ChangePassword"]
         
-        # Parcourir tous les boutons pour trouver le bouton de quitter et le bouton de changement
+        # Iterate through all buttons to find quit button and change button
         for widget in self.walk():
             if isinstance(widget, SafeButton):
                 if widget.text == self.glossary.get("ExitApp") or "quitt" in widget.text.lower():
@@ -575,7 +575,7 @@ class MainScreen(MDScreen):
         if platform == 'android':
             PythonService = autoclass('org.kivy.android.PythonService')
             service = PythonService.mService
-            logging.info("Service Android par défaut utilisé.")
+            logging.info("Default Android service used.")
             return service
         
     def on_start_button(self, *args):
@@ -594,13 +594,13 @@ class MainScreen(MDScreen):
 
     def stop_flask_server(self):
         if self.flask_thread:
-            # Code pour arrêter le serveur Flask si nécessaire
+            # Code to stop Flask server if necessary
             logging.info("Flask server stopped")
 
     if platform == 'android':
         @run_on_ui_thread
         def request_ignore_battery_optimizations(self):
-            # if the battery settings are already set dont do anythin
+            # If the battery settings are already set don't do anything
             if os.path.exists('.battery_optimization_informed'):
                 return
             Intent = autoclass('android.content.Intent')
@@ -615,7 +615,7 @@ class MainScreen(MDScreen):
             with open('.battery_optimization_informed', 'w') as f:
                 f.write('')
             toast(self.glossary['DisableBatteryOptimizations'])
-            logging.info("Paramètres d'optimisation de la batterie ouverts.")
+            logging.info("Battery optimization settings opened.")
 
     def stop_app(self, *args):
         self.app.stop()
@@ -647,7 +647,7 @@ class MainScreen(MDScreen):
                 self.wakelock_button.text = self.glossary["DisableWakelock"]
                 toast(self.glossary["WakelockEnabled"])
             except Exception as e:
-                print(f"Erreur lors de l'activation du wakelock: {e}")
+                print(f"Error when activating wakelock: {e}")
         else:
             toast(self.glossary["WakelockNotSupported"])
 
@@ -658,18 +658,18 @@ class MainScreen(MDScreen):
             self.wakelock_button.text = self.glossary["EnableWakelock"]
             toast(self.glossary["WakelockDisabled"])
 
-    # Créer une fonction pour appliquer le style de texte à tous les widgets
+    # Create a function to apply text style to all widgets
     def apply_font_to_all_widgets(self):
-        """Applique la police Bagnard à tous les widgets de texte"""
+        """Apply Bagnard font to all text widgets"""
         for widget in self.walk():
             if hasattr(widget, 'font_name'):
                 widget.font_name = 'Bagnard'
-            # Pour les widgets spécifiques avec des propriétés de titre
+            # For specific widgets with title properties
             if hasattr(widget, 'title') and isinstance(widget, MDTopAppBar):
                 for child in widget.walk():
                     if hasattr(child, 'font_name'):
                         child.font_name = 'Bagnard'
-            # Pour MDDropdownMenu items qui seront créés dynamiquement
+            # For MDDropdownMenu items that will be created dynamically
             if isinstance(widget, MDDropdownMenu):
                 for item in widget.items:
                     if 'font_name' not in item:
