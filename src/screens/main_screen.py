@@ -146,15 +146,15 @@ class MainScreen(MDScreen):
         )
 
         ip_label = MDLabel(
-            text=f"{get_local_ip()}",
+            text=f"{get_local_ip()}[color=#CCCCCC]:8080[/color]",
             font_style='H3',
             size_hint_y=1,  # Takes all remaining space
             font_name='Bagnard',
             halign='center',
             valign='middle',
             theme_text_color="Primary",
-            font_size=dp(40),  # Even larger font size
             bold=True,
+            markup=True,
         )
 
         ip_box.add_widget(ip_label)
@@ -525,7 +525,7 @@ class MainScreen(MDScreen):
                     widget.text = f"[size={dp(28)}px][font=MaterialIcons]{md_icons['alert-rhombus']}[/font][/size] [size={dp(18)}px]" + self.glossary["KeepAppWake"] + "[/size]"
                 # Update IP label
                 elif "IP" in widget.text:
-                    widget.text = f"IP {self.glossary['Local']}: {get_local_ip()}"
+                    widget.text = f"IP {self.glossary['Local']}: {get_local_ip()}[color=#CCCCCC]:8080[/color]"
                 # Update section titles
                 elif widget.text == self.glossary.get("AccessibilitySettings") or "Accessibilité" in widget.text:
                     widget.text = self.glossary["AccessibilitySettings"]
