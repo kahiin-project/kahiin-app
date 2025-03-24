@@ -14,7 +14,18 @@
         "DisableBatteryOptimizations": "Veuillez désactiver l'optimisation de la batterie pour l'application Kahiin",
         "Setting": "Paramètre",
         "Enabled": "activé",
-        "Disabled": "désactivé"
+        "Disabled": "désactivé",
+        "ServerTab": "Serveur",
+        "SettingsTab": "Paramètres",
+        "Local": "Locale",
+        "LanguageTitle": "Langue",
+        "AboutApp": "À propos de l'application",
+        "EnableWakelock": "Activer le Wakelock",
+        "DisableWakelock": "Désactiver le Wakelock",
+        "WakelockEnabled": "Wakelock activé",
+        "WakelockDisabled": "Wakelock désactivé",
+        "WakelockNotSupported": "Wakelock non pris en charge sur cette plateforme",
+        "LanguageChanged": "Langue modifiée"
     },
     "en": {
         "KeepAppWake": "Keep the app in full screen to prevent Android from closing it",
@@ -23,7 +34,7 @@
         "ExitApp": "Exit App",
         "AccessibilitySettings": "Accessibility Settings",
         "DyslexicMode": "Dyslexic Mode",
-        "EndOnAllAnswered": "End when all questions have been answered",
+        "EndOnAllAnswered": "End when all questions\n have been answered",
         "RandomOrder": "Random Order",
         "ChangePassword": "New admin password",
         "Change": "Change",
@@ -31,7 +42,18 @@
         "DisableBatteryOptimizations": "Please disable battery optimization for the Kahiin app",
         "Setting": "Setting",
         "Enabled": "enabled",
-        "Disabled": "disabled"
+        "Disabled": "disabled",
+        "ServerTab": "Server",
+        "SettingsTab": "Settings",
+        "Local": "Local",
+        "LanguageTitle": "Language",
+        "AboutApp": "About the app",
+        "EnableWakelock": "Enable Wakelock",
+        "DisableWakelock": "Disable Wakelock",
+        "WakelockEnabled": "Wakelock enabled",
+        "WakelockDisabled": "Wakelock disabled",
+        "WakelockNotSupported": "Wakelock not supported on this platform",
+        "LanguageChanged": "Language changed"
     },
     "es": {
         "KeepAppWake": "Mantenga la aplicación en pantalla completa para evitar que Android la cierre",
@@ -48,7 +70,18 @@
         "DisableBatteryOptimizations": "Desactive la optimización de la batería para la aplicación Kahiin",
         "Setting": "Configuración",
         "Enabled": "habilitado",
-        "Disabled": "deshabilitado"
+        "Disabled": "deshabilitado",
+        "ServerTab": "Servidor",
+        "SettingsTab": "Ajustes",
+        "Local": "Local",
+        "LanguageTitle": "Idioma",
+        "AboutApp": "Acerca de la aplicación",
+        "EnableWakelock": "Activar Wakelock",
+        "DisableWakelock": "Desactivar Wakelock",
+        "WakelockEnabled": "Wakelock activado",
+        "WakelockDisabled": "Wakelock desactivado",
+        "WakelockNotSupported": "Wakelock no compatible en esta plataforma",
+        "LanguageChanged": "Idioma cambiado"
     },
     "it": {
         "KeepAppWake": "Mantieni l'app a schermo intero per evitare che Android la chiuda",
@@ -65,7 +98,18 @@
         "DisableBatteryOptimizations": "Disattiva l'ottimizzazione della batteria per l'app Kahiin",
         "Setting": "Impostazione",
         "Enabled": "abilitato",
-        "Disabled": "disabilitato"
+        "Disabled": "disabilitato",
+        "ServerTab": "Server",
+        "SettingsTab": "Impostazioni",
+        "Local": "Locale",
+        "LanguageTitle": "Lingua",
+        "AboutApp": "Informazioni sull'app",
+        "EnableWakelock": "Attiva Wakelock",
+        "DisableWakelock": "Disattiva Wakelock",
+        "WakelockEnabled": "Wakelock attivato",
+        "WakelockDisabled": "Wakelock disattivato",
+        "WakelockNotSupported": "Wakelock non supportato su questa piattaforma",
+        "LanguageChanged": "Lingua modificata"
     },
     "de": {
         "KeepAppWake": "Halten Sie die App im Vollbildmodus, um zu verhindern, dass Android sie schließt",
@@ -82,6 +126,17 @@
         "DisableBatteryOptimizations": "Bitte deaktivieren Sie die Batterieoptimierung für die Kahiin-App",
         "Setting": "Einstellung",
         "Enabled": "aktiviert",
-        "Disabled": "deaktiviert"
+        "Disabled": "deaktiviert",
+        "ServerTab": "Server",
+        "SettingsTab": "Einstellungen",
+        "Local": "Lokal",
+        "LanguageTitle": "Sprache",
+        "AboutApp": "Über die App",
+        "EnableWakelock": "Wakelock aktivieren",
+        "DisableWakelock": "Wakelock deaktivieren",
+        "WakelockEnabled": "Wakelock aktiviert",
+        "WakelockDisabled": "Wakelock deaktiviert",
+        "WakelockNotSupported": "Wakelock wird auf dieser Plattform nicht unterstützt",
+        "LanguageChanged": "Sprache geändert"
     }
 }
