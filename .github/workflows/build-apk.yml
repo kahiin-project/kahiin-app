@@ -6,6 +6,7 @@ on:
       - 'v*'
   release:
     types: [created, published]
+  workflow_dispatch:
 
 jobs:
   build-android:
@@ -15,40 +16,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          fetch-depth: 0  
-          
+          fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Fix JAVA_HOME
-        run: echo "JAVA_HOME=$(dirname $(dirname $(which javac)))" >> $GITHUB_ENV
+        run: |
+          sudo apt-get update
+          yes | sudo apt-get install -y openjdk-11-jdk
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip autoconf libtool pkg-config \
-            zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev android-tools-adb \
-            build-essential libsdl2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+          sudo apt-get install -y git zip unzip python3-pip autoconf libtool pkg-config \
+            zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev android-tools-adb build-essential \
+            libsdl2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install buildozer cython==0.29.33 pillow
           pip install -r requirements.txt
-          if [ -f kahiin/requirements.txt ]; then
-            pip install -r kahiin/requirements.txt
-          fi
+          pip install -r kahiin/requirements.txt
 
       - name: Update git submodules
-        run: git submodule update --remote --merge
+        run: git submodule update --init --recursive
 
       - name: Build with buildozer
         run: |
@@ -62,7 +57,7 @@ jobs:
           path: bin/*.apk
           retention-days: 90
 
-      - name: Release
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
         with:
